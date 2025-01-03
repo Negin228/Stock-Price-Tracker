@@ -1,21 +1,49 @@
 import sqlite3
 import yfinance as yf
 
-def fetch_stock_data():
-    # Connect to SQLite database
-    conn = sqlite3.connect('portfolio.db')
-    cursor = conn.cursor()
+# Connect to the portfolio database
+conn = sqlite3.connect('portfolio.db')
+cursor = conn.cursor()
 
-    # Get all stock symbols from the portfolio
-    cursor.execute('SELECT stock_symbol FROM stocks')
-    stock_symbols = cursor.fetchall()
+# Create the portfolio table if it does not exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS portfolio (
+        symbol TEXT PRIMARY KEY,
+        name TEXT,
+        price REAL
+    );
+''')
 
-    for symbol in stock_symbols:
-        stock_symbol = symbol[0]
-        stock_data = yf.Ticker(stock_symbol).history(period="1d")
-        print(f"Stock: {stock_symbol}")
-        print(stock_data.tail(1))  # Show latest data (e.g., last closing price)
+# Function to get stock price using yfinance
+def get_stock_price(symbol):
+    stock = yf.Ticker(symbol)
+    price = stock.history(period='1d')['Close'][0]
+    return price
 
-    conn.close()
+# Function to add a stock to the portfolio database
+def add_stock_to_portfolio(symbol, name, price):
+    cursor.execute('''
+        INSERT INTO portfolio (symbol, name, price) 
+        VALUES (?, ?, ?) 
+        ON CONFLICT(symbol) DO NOTHING;
+    ''', (symbol, name, price))
+    conn.commit()
 
-fetch_stock_data()
+# Add predefined stocks to the portfolio
+def add_predefined_stocks():
+    stocks = ['AAPL', 'GOOG', 'AMZN']  # List of stock symbols you want to track
+    for symbol in stocks:
+        price = get_stock_price(symbol)
+        add_stock_to_portfolio(symbol, name=symbol, price=price)  # Add each stock to the portfolio
+
+# Call the function to add predefined stocks
+add_predefined_stocks()
+
+# Print the contents of the portfolio table
+cursor.execute('SELECT * FROM portfolio')
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+
+# Close the database connection
+conn.close()
