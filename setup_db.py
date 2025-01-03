@@ -1,20 +1,20 @@
 import sqlite3
 
-# Database file
-DB_FILE = "portfolio.db"
+# Connect to SQLite database (it will be created if it doesn't exist)
+conn = sqlite3.connect('portfolio.db')
+cursor = conn.cursor()
 
-def create_table():
-    """Create the portfolio table if it doesn't exist."""
-    with sqlite3.connect(DB_FILE) as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS portfolio (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticker TEXT UNIQUE NOT NULL
-        )
-        """)
-        conn.commit()
-        print("Table 'portfolio' has been created (if it didn't exist already).")
+# Create table for stocks if it doesn't already exist
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS stocks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stock_symbol TEXT NOT NULL,
+    stock_name TEXT
+);
+''')
 
-if __name__ == "__main__":
-    create_table()
+# Commit and close
+conn.commit()
+conn.close()
+
+print("Database setup complete.")
