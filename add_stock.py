@@ -1,23 +1,26 @@
 import sqlite3
 
-def add_stock_to_portfolio(symbol, name=None):
-    # Connect to SQLite database
-    conn = sqlite3.connect('portfolio.db')
-    cursor = conn.cursor()
+# Connect to the portfolio database
+conn = sqlite3.connect('portfolio.db')
+cursor = conn.cursor()
 
-    # Insert the stock symbol and name into the database
+# Function to add a stock to the portfolio database
+def add_stock_to_portfolio(symbol, name):
     cursor.execute('''
-    INSERT INTO stocks (stock_symbol, stock_name)
-    VALUES (?, ?)
+        INSERT INTO portfolio (symbol, name) 
+        VALUES (?, ?) 
+        ON CONFLICT(symbol) DO NOTHING;
     ''', (symbol, name))
-
-    # Commit and close
     conn.commit()
-    conn.close()
-    
-    print(f"Added {symbol} to the portfolio.")
 
-# Example usage:
-stock_symbol = input("Enter the stock symbol: ")
-stock_name = input("Enter the stock name (optional): ")
-add_stock_to_portfolio(stock_symbol, stock_name)
+# Add predefined stocks to the portfolio
+def add_predefined_stocks():
+    stocks = ['AAPL', 'GOOG', 'AMZN']  # List of stock symbols you want to track
+    for symbol in stocks:
+        add_stock_to_portfolio(symbol, name=symbol)  # Add each stock to the portfolio
+
+# Call the function to add predefined stocks
+add_predefined_stocks()
+
+# Close the database connection
+conn.close()
