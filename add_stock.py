@@ -4,6 +4,14 @@ import sqlite3
 conn = sqlite3.connect('portfolio.db')
 cursor = conn.cursor()
 
+# Create the portfolio table if it does not exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS portfolio (
+        symbol TEXT PRIMARY KEY,
+        name TEXT
+    );
+''')
+
 # Function to add a stock to the portfolio database
 def add_stock_to_portfolio(symbol, name):
     cursor.execute('''
