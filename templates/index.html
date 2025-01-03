@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1>Stock Portfolio</h1>
+    <button id="refresh-button">Refresh Data</button>
     <table border="1">
         <tr>
             <th>Symbol</th>
@@ -21,5 +22,25 @@
         </tr>
         {% endfor %}
     </table>
+    <script>
+        document.getElementById('refresh-button').addEventListener('click', function() {
+            fetch('/refresh')
+                .then(response => response.json())
+                .then(data => {
+                    // Replace the table rows with new data
+                    const table = document.querySelector('table');
+                    while (table.rows.length > 1) {
+                        table.deleteRow(1);
+                    }
+                    data.forEach(stock => {
+                        const row = table.insertRow();
+                        row.insertCell(0).textContent = stock.symbol;
+                        row.insertCell(1).textContent = stock.name;
+                        row.insertCell(2).textContent = stock.price;
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
 </body>
 </html>
