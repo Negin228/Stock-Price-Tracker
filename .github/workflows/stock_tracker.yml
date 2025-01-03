@@ -1,49 +1,31 @@
-name: Stock Tracker Workflow
+name: Stock Tracker
 
-# Trigger the workflow manually via the GitHub UI
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
-  stock-tracker:
-    runs-on: ubuntu-latest  # Specify the environment to run the job
+  stock_tracking:
+    runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    # Step 2: Set up Python environment
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.9'  # Specify the Python version to use
+        python-version: '3.x'
 
-    # Step 3: Install dependencies
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt  # Install the required libraries from requirements.txt
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-    # Step 4: Set up the database (optional)
-    - name: Set up database
+    - name: Set up the database
       run: |
-        python setup_db.py  # Initialize the database, if necessary
+        python setup_db.py  # Create the 'portfolio' table
 
-    # Step 5: Add stocks to the portfolio (optional)
-    - name: Add stocks to portfolio
+    - name: Run the stock tracking scripts
       run: |
-        python add_stock.py  # Add stocks to the portfolio (you can also add a hardcoded list here)
-
-    # Step 6: Fetch stock data and update portfolio
-    - name: Track stock prices
-      run: |
-        python stock_tracker.py  # Fetch stock data using yfinance and update the portfolio
-
-    # Step 7: (Optional) Save the updated portfolio.db or generate reports, etc.
-    - name: Commit and push changes
-      run: |
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@users.noreply.github.com"
-        git add portfolio.db
-        git commit -m "Updated portfolio with latest stock data"
-        git push
+        python add_stock.py  # Add predefined stocks to the portfolio
+        python stock_tracker.py  # Fetch stock prices and update database
