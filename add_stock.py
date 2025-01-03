@@ -30,5 +30,11 @@ def add_predefined_stocks():
 # Call the function to add predefined stocks
 add_predefined_stocks()
 
+# Print the contents of the portfolio table
+cursor.execute('SELECT * FROM portfolio')
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+
 # Close the database connection
 conn.close()
