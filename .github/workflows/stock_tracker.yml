@@ -23,7 +23,7 @@ jobs:
 
     - name: Set up the database
       run: |
-        python setup_db.py  # Create the 'portfolio' table
+        python setup_stocks_db.py  # Create the 'stocks' table
 
     - name: Run the stock tracking scripts
       run: |
