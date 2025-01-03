@@ -1,9 +1,9 @@
-name: Stock Price Tracker
+name: Run Stock Price Tracker
 
 on:
+  workflow_dispatch:  # Allows manual triggering
   schedule:
-    - cron: '0 12 * * *'  # Runs daily at 12:00 UTC
-  workflow_dispatch:  # Allows manual trigger
+    - cron: '0 12 * * *'  # Runs daily at 12:00 UTC (adjust as needed)
 
 jobs:
   run-script:
@@ -19,7 +19,8 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install yfinance
+        run: |
+          pip install yfinance
 
-      - name: Run script
+      - name: Run stock tracker script
         run: python stock_prices.py
