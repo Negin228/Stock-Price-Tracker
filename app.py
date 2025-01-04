@@ -4,6 +4,11 @@ import psycopg2
 from flask import Flask, render_template
 import yfinance as yf
 
+# Check if DB_HOST is set
+db_host = os.environ.get('DB_HOST')
+if db_host is None:
+    print("DB_HOST is not set")
+
 app = Flask(__name__)
 
 # Function to update stock prices in the database
@@ -12,7 +17,7 @@ def update_stock_prices():
     
     # Connect to your PostgreSQL database using environment variables
     conn = psycopg2.connect(
-        host=os.environ['DB_HOST'],
+        host=db_host,
         database=os.environ['DB_NAME'],
         user=os.environ['DB_USER'],
         password=os.environ['DB_PASSWORD']
@@ -41,5 +46,5 @@ def refresh():
     return "Stock prices updated!"
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    from os import environ
+    app.run(host='0.0.0.0', port=int(environ.get('PORT', 5000)))
