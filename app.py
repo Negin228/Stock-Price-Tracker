@@ -43,6 +43,9 @@ def home():
 from flask import jsonify
 
 @app.route('/refresh')
+from flask import jsonify
+
+@app.route('/refresh')
 def refresh():
     update_stock_prices()
     # Fetch the updated stock data from the database
