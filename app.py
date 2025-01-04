@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import psycopg2
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import yfinance as yf
 
 # Check if DB_HOST is set
@@ -39,11 +39,6 @@ def update_stock_prices():
 @app.route('/')
 def home():
     return render_template('index.html')  # Ensure that index.html is in the 'templates' folder
-
-from flask import jsonify
-
-@app.route('/refresh')
-from flask import jsonify
 
 @app.route('/refresh')
 def refresh():
