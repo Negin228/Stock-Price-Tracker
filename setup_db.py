@@ -5,22 +5,8 @@ from urllib.parse import urlparse
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ['DATABASE_URL']
 
-# Parse the database URL
-url = urlparse(DATABASE_URL)
-dbname = url.path[1:]
-user = url.username
-password = url.password
-host = url.hostname
-port = url.port
-
 # Connect to the database
-conn = psycopg2.connect(
-    dbname=dbname,
-    user=user,
-    password=password,
-    host=host,
-    port=port
-)
+conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
 # Create table
