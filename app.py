@@ -23,11 +23,9 @@ def update_stock_prices():
     for symbol in symbols:
         # Fetch the stock price using yfinance
         stock = yf.Ticker(symbol)
-        price = stock.history(period='1d')['Close'][0]  # Get the latest closing price
         
         # Ensure price is a float and insert it into the database
-        price = float(price)  # Ensure the price is a regular float type
-        
+        price = float(stock.history(period='1d')['Close'][0])  # Ensure price is a regular float
         cursor.execute('UPDATE portfolio SET price = %s WHERE symbol = %s', (price, symbol))
     
     # Commit changes and close the connection
