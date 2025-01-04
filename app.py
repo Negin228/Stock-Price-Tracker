@@ -16,25 +16,26 @@ def update_stock_prices():
     symbols = ['AAPL', 'GOOGL', 'AMZN']  # Example stock symbols
     
     # Connect to your PostgreSQL database using environment variables
-    conn = psycopg2.connect(
-        host=db_host,
-        database=os.environ['DB_NAME'],
-        user=os.environ['DB_USER'],
-        password=os.environ['DB_PASSWORD']
-    )
-    cursor = conn.cursor()
-    
-    for symbol in symbols:
-        stock = yf.Ticker(symbol)
-        price = stock.history(period='1d')['Close'][0]  # Get the latest closing price
+    try:
+        conn = psycopg2.connect(
+            host=db_host,
+            database=os.environ['DB_NAME'],
+            user=os.environ['DB_USER'],
+            password=os.environ['DB_PASSWORD']
+        )
+        cursor = conn.cursor()
         
-        price = float(price)  # Ensure the price is a regular float type
+        for symbol in symbols:
+            stock = yf.Ticker(symbol)
+            price = stock.history(period='1d')['Close'][0]  # Get the latest closing price
+            price = float(price)  # Ensure the price is a regular float type
+            cursor.execute('UPDATE portfolio SET price = %s WHERE symbol = %s', (price, symbol))
         
-        cursor.execute('UPDATE portfolio SET price = %s WHERE symbol = %s', (price, symbol))
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error updating stock prices: {e}")
 
 @app.route('/')
 def home():
@@ -42,20 +43,24 @@ def home():
 
 @app.route('/refresh')
 def refresh():
-    update_stock_prices()
-    # Fetch the updated stock data from the database
-    conn = psycopg2.connect(
-        host=os.environ['DB_HOST'],
-        database=os.environ['DB_NAME'],
-        user=os.environ['DB_USER'],
-        password=os.environ['DB_PASSWORD']
-    )
-    cursor = conn.cursor()
-    cursor.execute('SELECT symbol, name, price FROM portfolio')
-    portfolio = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return jsonify(portfolio)
+    try:
+        update_stock_prices()
+        # Fetch the updated stock data from the database
+        conn = psycopg2.connect(
+            host=os.environ['DB_HOST'],
+            database=os.environ['DB_NAME'],
+            user=os.environ['DB_USER'],
+            password=os.environ['DB_PASSWORD']
+        )
+        cursor = conn.cursor()
+        cursor.execute('SELECT symbol, name, price FROM portfolio')
+        portfolio = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(portfolio)
+    except Exception as e:
+        print(f"Error refreshing data: {e}")
+        return jsonify({"error": "Failed to refresh data"}), 500
 
 if __name__ == "__main__":
     from os import environ
