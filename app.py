@@ -1,36 +1,39 @@
 import os
 import numpy as np
 import psycopg2
-from flask import Flask
+from flask import Flask, render_template
 import yfinance as yf
 
 app = Flask(__name__)
 
 # Function to update stock prices in the database
 def update_stock_prices():
-    try:
-        symbols = ['AAPL', 'GOOGL', 'AMZN']
-        conn = psycopg2.connect(
-            host=os.environ['DB_HOST'],
-            database=os.environ['DB_NAME'],
-            user=os.environ['DB_USER'],
-            password=os.environ['DB_PASSWORD']
-        )
-        cursor = conn.cursor()
+    symbols = ['AAPL', 'GOOGL', 'AMZN']  # Example stock symbols
+    
+    # Connect to your PostgreSQL database using environment variables
+    conn = psycopg2.connect(
+        host=os.environ['DB_HOST'],
+        database=os.environ['DB_NAME'],
+        user=os.environ['DB_USER'],
+        password=os.environ['DB_PASSWORD']
+    )
+    cursor = conn.cursor()
+    
+    for symbol in symbols:
+        stock = yf.Ticker(symbol)
+        price = stock.history(period='1d')['Close'][0]  # Get the latest closing price
+        
+        price = float(price)  # Ensure the price is a regular float type
+        
+        cursor.execute('UPDATE portfolio SET price = %s WHERE symbol = %s', (price, symbol))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
 
-        for symbol in symbols:
-            stock = yf.Ticker(symbol)
-            price = stock.history(period='1d')['Close'][0]
-            price = float(price)
-            cursor.execute('UPDATE portfolio SET price = %s WHERE symbol = %s', (price, symbol))
-
-        conn.commit()
-    except Exception as e:
-        print(f"Error updating stock prices: {e}")
-    finally:
-        cursor.close()
-        conn.close()
-
+@app.route('/')
+def home():
+    return render_template('index.html')  # Ensure that index.html is in the 'templates' folder
 
 @app.route('/refresh')
 def refresh():
