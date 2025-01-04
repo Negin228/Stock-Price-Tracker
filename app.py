@@ -34,3 +34,18 @@ def update_stock_prices():
             print(f"Failed to fetch data for {symbol}.")
     conn.commit()
     conn.close()
+
+# Route definitions
+@app.route('/')
+def index():
+    portfolio = get_portfolio_data()
+    return render_template('index.html', portfolio=portfolio)
+
+@app.route('/refresh')
+def refresh():
+    update_stock_prices()
+    portfolio = get_portfolio_data()
+    return jsonify([{'symbol': stock[0], 'name': stock[1], 'price': stock[2]} for stock in portfolio])
+
+if __name__ == '__main__':
+    app.run(debug=True)
