@@ -1,1 +1,1 @@
-worker: python stock_prices.py
+web: python app.py
