@@ -1,8 +1,7 @@
-import psycopg2
-import os
-from flask import Flask, render_template, jsonify
-import yfinance as yf
 import numpy as np
+import psycopg2
+from flask import Flask
+import yfinance as yf
 
 app = Flask(__name__)
 
@@ -23,9 +22,11 @@ def update_stock_prices():
     for symbol in symbols:
         # Fetch the stock price using yfinance
         stock = yf.Ticker(symbol)
+        price = stock.history(period='1d')['Close'][0]  # Get the latest closing price
         
         # Ensure price is a float and insert it into the database
-        price = float(stock.history(period='1d')['Close'][0])  # Ensure price is a regular float
+        price = float(price)  # Ensure the price is a regular float type
+        
         cursor.execute('UPDATE portfolio SET price = %s WHERE symbol = %s', (price, symbol))
     
     # Commit changes and close the connection
